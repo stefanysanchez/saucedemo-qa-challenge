@@ -1,3 +1,5 @@
-// TODO: implement shared types
-
-export {};
+export interface User {
+  username: string;
+  password: string;
+  description: string;
+}
