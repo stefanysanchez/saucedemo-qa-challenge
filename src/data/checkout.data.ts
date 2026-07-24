@@ -1,3 +1,7 @@
-// TODO: implement checkout test data
+import { CheckoutInfo } from '../types';
 
-export {};
+export const checkoutData: CheckoutInfo = {
+  firstName: 'Stefany',
+  lastName: 'Sanchez',
+  postalCode: '00000',
+};
