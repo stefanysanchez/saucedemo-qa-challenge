@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test:showcase": "playwright test --grep @demo",
+    "test:ci": "playwright test --grep-invert @demo"
+  },
   "keywords": [],
   "type": "commonjs",
   "devDependencies": {
