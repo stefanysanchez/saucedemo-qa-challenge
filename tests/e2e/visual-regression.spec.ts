@@ -31,7 +31,7 @@ import { users } from '../../src/data/users.data';
  * dentro de ese entorno — es un comportamiento esperado de Playwright,
  * no un bug del test.
  */
-test.describe('Visual regression — inventario', () => {
+test.describe('@visual Visual regression — inventario', () => {
   test.use({ viewport: { width: 1280, height: 720 } });
 
   test('la página de inventario coincide con el baseline visual', async ({

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test:showcase": "playwright test --grep @demo",
-    "test:ci": "playwright test --grep-invert \"@demo|Visual regression\"",
+    "test:ci": "playwright test --grep-invert \"@demo|@visual\"",
     "test:visual": "playwright test tests/e2e/visual-regression.spec.ts"
   },
   "keywords": [],
