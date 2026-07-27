@@ -1,0 +1,1 @@
+A snapshot doesn't exist at C:\Users\stefany.sanchez\Desktop\saucedemo-qa-challenge\tests\e2e\visual-regression.spec.ts-snapshots\inventory-standard-user-chromium-win32.png, writing actual.
