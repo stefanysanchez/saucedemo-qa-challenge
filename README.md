@@ -4,86 +4,109 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 ![Playwright](https://img.shields.io/badge/Playwright-latest-green)
 
-Framework de automatización end-to-end para el e-commerce demo **SauceDemo**, construido con **Playwright + TypeScript** bajo el patrón **Page Object Model (POM)**, con reportes enriquecidos vía **Allure**, integración de **IA (Google Gemini)** para generación de datos y análisis de resultados, y un pipeline de **CI/CD en GitHub Actions**.
+End-to-end automation framework for the **SauceDemo** e-commerce demo, built with **Playwright + TypeScript** following the **Page Object Model (POM)** pattern, with enriched reporting via **Allure**, **AI integration (Google Gemini)** for data generation and results analysis, and a **CI/CD pipeline on GitHub Actions**.
 
-## Por qué existe este proyecto
+## Why this project exists
 
-Resuelve tres dolores concretos de calidad en e-commerce: bugs que llegan a producción, regresiones manuales lentas, y falta de confianza a la hora de hacer un release. La suite cubre el flujo crítico de compra, escenarios negativos de autenticación, y validación multi-usuario, con evidencia automática (screenshots, video, trace) ante cualquier fallo.
+It solves three concrete quality pains in e-commerce: bugs reaching production, slow manual regressions, and lack of confidence when shipping a release. The suite covers the critical purchase flow, negative authentication scenarios, and multi-user validation, with automatic evidence (screenshots, video, trace) on any failure.
 
-## Stack técnico
+## Tech stack
 
-| Herramienta | Uso |
+| Tool | Use |
 |---|---|
-| Playwright + TypeScript | Motor de automatización y lenguaje |
-| Page Object Model | Arquitectura, separación de capas |
-| Allure Report | Reporte de evidencias navegable |
-| Google Gemini API | Generación de datos + resumen ejecutivo por IA |
+| Playwright + TypeScript | Automation engine and language |
+| Page Object Model | Architecture, layer separation |
+| Allure Report | Navigable evidence report |
+| Google Gemini API | Data generation + AI executive summary |
 | GitHub Actions | CI/CD |
 
-## Estructura del proyecto
+## Project structure
 
 ```
 src/
-├── pages/       Page Objects (sin asserts)
-├── fixtures/    Inyección automática de Page Objects
-├── data/        Datos de prueba tipados
-├── types/       Interfaces compartidas
-tests/e2e/       Specs (login, compra, data-driven)
-ai-scripts/      Scripts de IA (generación de datos + análisis de resultados)
-.github/workflows/  Pipeline de CI
+├── pages/       Page Objects (no asserts)
+├── fixtures/    Automatic Page Object injection
+├── data/        Typed test data
+├── types/       Shared interfaces
+tests/e2e/
+├── login.spec.ts               Negative login scenarios
+├── data-driven.spec.ts         Login iterating over multiple users
+├── purchase.spec.ts            Full happy-path purchase flow
+├── api-smoke.spec.ts           HTTP smoke test (no browser)
+├── network-resilience.spec.ts  Resilience against image load failures
+├── visual-regression.spec.ts   Visual regression on inventory (toHaveScreenshot)
+└── report-showcase.spec.ts     Demo suite (@demo), excluded from the CI gate
+ai-scripts/      AI scripts (data generation + results analysis)
+.github/workflows/  CI pipeline
 ```
 
 ## Quickstart
 
-Instalar dependencias:
+Install dependencies:
 ```bash
 npm install
 npx playwright install --with-deps chromium
 ```
 
-Correr la suite completa:
+Run the full suite:
 ```bash
 npx playwright test
 ```
 
-Ver el reporte HTML nativo de Playwright:
+View the native Playwright HTML report:
 ```bash
 npx playwright show-report
 ```
 
-Generar y abrir el reporte de Allure:
+Generate and open the Allure report:
 ```bash
 npx allure generate allure-results --clean -o allure-report
 npx allure open allure-report
 ```
 
-## Scripts de IA
+## AI scripts
 
-Requieren una GEMINI_API_KEY en un archivo .env en la raíz (ver .env.example).
+They require a GEMINI_API_KEY in a .env file at the project root (see .env.example).
 
-Generar datos dinámicos de checkout:
+Generate dynamic checkout data:
 ```bash
 npx tsx ai-scripts/generate-test-data.ts
 ```
 
-Generar un resumen ejecutivo en lenguaje natural a partir de la última corrida de tests:
+Generate a natural-language executive summary from the latest test run:
 ```bash
 npx tsx ai-scripts/analyze-report.ts
 ```
 
-## Cobertura de tests
+## Test coverage
 
-| Suite | Tests | Qué valida |
+| Suite | Tests | What it validates |
 |---|---|---|
-| login.spec.ts | 3 | Escenarios negativos: usuario bloqueado, contraseña inválida, campos vacíos |
-| data-driven.spec.ts | 3 | Login iterando sobre standard_user, problem_user, performance_glitch_user |
-| purchase.spec.ts | 1 | Happy path completo: login → carrito → checkout → confirmación |
-| report-showcase.spec.ts (@demo) | 3 | Suite demostrativa para evidenciar estados passed/failed/skipped en Allure. Excluida del gate de CI. |
+| login.spec.ts | 3 | Negative scenarios: locked-out user, invalid password, empty fields |
+| data-driven.spec.ts | 3 | Login iterating over standard_user, problem_user, performance_glitch_user |
+| purchase.spec.ts | 1 | Full happy path: login → cart → checkout → confirmation |
+| api-smoke.spec.ts | 3 | HTTP-level smoke test (no browser): site availability, response time, static assets |
+| network-resilience.spec.ts | 2 | The purchase happy path and the inventory page keep working even when product images fail to load (page.route) |
+| visual-regression.spec.ts | 1 | Visual regression on the inventory page against a versioned baseline (toHaveScreenshot) |
+| report-showcase.spec.ts (@demo) | 3 | Demo suite to showcase passed/failed/skipped states in Allure |
+
+**Total: 16 tests.** Of those, **12 run in the CI gate** (`npm run test:ci`); the other 4 are intentionally excluded: the 3 in `report-showcase.spec.ts` (tag `@demo`, demo-only) and the one in `visual-regression.spec.ts` (its baseline is platform-specific — see the CI/CD section).
 
 ## CI/CD
 
-Cada push a main dispara el workflow de GitHub Actions: instala dependencias, corre la suite real (excluyendo @demo), y publica como artefactos el reporte de Playwright y los resultados de Allure. Evidencia de fallos (trace/video/screenshot) se sube solo si algún test falla.
+Every push to main triggers the GitHub Actions workflow: it installs dependencies, runs `npm run test:ci`, and publishes the Playwright report and Allure results as artifacts. Failure evidence (trace/video/screenshot) is uploaded only if a test fails.
 
-## Decisiones de arquitectura
+`test:ci` runs `playwright test --grep-invert "@demo|Visual regression"`, excluding both the demo suite (`@demo`) and `visual-regression.spec.ts`. The latter is excluded because its baseline (`inventory-standard-user-*.png`) was generated on local Windows; the CI runner is Linux (`ubuntu-latest`), so running it there would fail due to a missing snapshot, not an actual regression. To run it manually on its own:
+```bash
+npm run test:visual
+```
 
-Ver el informe técnico completo con justificación de cada decisión, trade-offs conocidos y consideraciones de escalabilidad a 500+ tests en docs/Informe_SauceDemo_QA.md.
+## Architecture decisions
+
+- **POM with strict layer separation**: Page Objects (`src/pages/`) contain no asserts, only interactions and state reading; assertions live in the specs.
+- **Fixtures for automatic injection** (`src/fixtures/pages.fixture.ts`): every test receives `loginPage`, `inventoryPage`, `cartPage`, `checkoutPage` already instantiated, with no manual construction boilerplate.
+- **Chromium only at this stage**: a deliberate time/scope trade-off; cross-browser (Firefox, WebKit) is left as the next iteration, not an oversight.
+- **AI scoped to two concrete use cases** (checkout data generation and natural-language results analysis), never to generate or decide which tests to run — AI plays no role in the testing logic itself.
+- **AI provider: Google Gemini**, free tier. A choice with no architectural impact: it's a direct HTTP call to the public API, replaceable with any other provider without touching the rest of the framework.
+- **API coverage via HTTP smoke + network resilience**, instead of mocking a login endpoint that SauceDemo doesn't expose (login is validated 100% client-side against a hardcoded array in the bundle).
+- **Visual regression on `standard_user`**, not `problem_user`: the latter has intentionally broken product images (a bug seeded by SauceDemo), which would make the baseline non-deterministic.
