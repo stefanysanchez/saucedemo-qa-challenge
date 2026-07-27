@@ -1,11 +1,6 @@
 import { test, expect } from '../../src/fixtures/pages.fixture';
 import { users } from '../../src/data/users.data';
 
-// Suite exclusivamente demostrativa para mostrar el espectro completo de estados
-// en el reporte de Allure (passed, failed, skipped). NO forma parte del gate de CI:
-// se ejecuta manualmente con `npm run test:showcase` antes de generar el reporte
-// para la defensa técnica. Etiquetada con @demo para exclusión selectiva.
-
 test.describe('@demo Showcase de estados de reporte', () => {
 
   test('@demo passed esperado: login válido', async ({ loginPage, inventoryPage }) => {

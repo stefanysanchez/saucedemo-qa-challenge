@@ -1,18 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * Smoke test a nivel HTTP (no UI).
- *
- * SauceDemo no expone un endpoint de autenticación real (el login se
- * valida 100% client-side contra un array hardcodeado en el bundle JS),
- * por lo que no existe una "respuesta de login" que interceptar o mockear
- * a nivel de API.
- *
- * Lo que SÍ es una verificación de API legítima es chequear la
- * disponibilidad y salud del sitio a nivel de protocolo HTTP, sin
- * levantar un navegador. Esto sirve como gate previo a la suite de UI:
- * si el sitio no responde, no tiene sentido correr Playwright con browser.
- */
 test.describe('API-level smoke test — disponibilidad de SauceDemo', () => {
   const BASE_URL = '/';
 
